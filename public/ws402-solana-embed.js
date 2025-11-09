@@ -7,7 +7,8 @@
   const targetId = script.getAttribute('data-target') || 'ws402-embed';
   const autoplay = script.getAttribute('data-autoplay') !== 'false';
   
-  const PROXY_URL = script.src.split('/embed.js')[0];
+  // Extract base URL properly (remove script filename)
+  const PROXY_URL = script.src.substring(0, script.src.lastIndexOf('/'));
   
   // Load Solana Web3
   const web3Script = document.createElement('script');

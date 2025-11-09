@@ -68,6 +68,71 @@
       border-radius: 15px;
       padding: 20px;
       border: 2px solid rgba(102, 126, 234, 0.3);
+      min-height: 400px;
+    }
+
+    .resource-input-section {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+
+    .resource-input-section h3 {
+      color: #667eea;
+      margin-bottom: 15px;
+      font-size: 1.1rem;
+    }
+
+    .input-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .input-group input {
+      flex: 1;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      font-size: 0.95rem;
+    }
+
+    .input-group input::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    .input-group button {
+      padding: 12px 24px;
+      border-radius: 8px;
+      border: none;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .input-group button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .hint {
+      color: #888;
+      font-size: 0.85rem;
+      margin-top: 8px;
+    }
+
+    .hint a {
+      color: #667eea;
+      text-decoration: none;
+    }
+
+    .hint a:hover {
+      text-decoration: underline;
     }
 
     .code-block {
@@ -258,16 +323,30 @@
     <!-- Live Demo Section -->
     <div class="demo-section">
       <h2>✨ Live Demo</h2>
+      
+      <!-- Input for custom resource -->
+      <div class="resource-input-section">
+        <h3>🎯 Try Your Own Protected Resource</h3>
+        <div class="input-group">
+          <input 
+            type="text" 
+            id="resourceIdInput" 
+            placeholder="Enter your resource ID (e.g., irtNJB1AOa)"
+            value="pSM7V2-HM-"
+          />
+          <button onclick="loadCustomResource()">Load Widget</button>
+        </div>
+        <p class="hint">
+          💡 Don't have a resource? <a href="/">Create one here</a> in 30 seconds!
+        </p>
+      </div>
+
       <div class="demo-grid">
         <div>
           <h3 style="margin-bottom: 15px; color: #aaa;">The Widget in Action:</h3>
           <div class="demo-widget">
             <!-- WS402 Widget will load here -->
             <div id="ws402-demo-player"></div>
-            <script src="/ws402-solana-embed.js" 
-                    data-resource="irtNJB1AOa"
-                    data-target="ws402-demo-player">
-            </script>
           </div>
           <p style="margin-top: 15px; color: #888; font-size: 0.9rem;">
             👆 This is a live, functional widget. Try clicking "Pay & Watch" to see the complete payment flow!
@@ -278,9 +357,9 @@
           <h3 style="margin-bottom: 15px; color: #aaa;">How to Embed:</h3>
           
           <div class="tab-buttons">
-            <button class="tab-btn active" onclick="showTab('html')">HTML</button>
-            <button class="tab-btn" onclick="showTab('react')">React</button>
-            <button class="tab-btn" onclick="showTab('vue')">Vue</button>
+            <button class="tab-btn active" onclick="showTab('html', event)">HTML</button>
+            <button class="tab-btn" onclick="showTab('react', event)">React</button>
+            <button class="tab-btn" onclick="showTab('vue', event)">Vue</button>
           </div>
 
           <div id="html-tab" class="tab-content active">
@@ -288,7 +367,7 @@
               <pre><span class="comment">&lt;!-- Add this to any HTML page --&gt;</span>
 <span class="tag">&lt;div</span> <span class="attr">id</span>=<span class="value">"my-video"</span><span class="tag">&gt;&lt;/div&gt;</span>
 
-<span class="tag">&lt;script</span> <span class="attr">src</span>=<span class="value">"https://your-domain.com/embed.js"</span>
+<span class="tag">&lt;script</span> <span class="attr">src</span>=<span class="value">"https://proxy.ws402.org/ws402-solana-embed.js"</span>
         <span class="attr">data-resource</span>=<span class="value">"abc123"</span>
         <span class="attr">data-target</span>=<span class="value">"my-video"</span><span class="tag">&gt;</span>
 <span class="tag">&lt;/script&gt;</span></pre>
@@ -303,7 +382,7 @@
 <span class="tag">function</span> <span class="value">VideoPlayer</span>() {
   useEffect(() => {
     <span class="tag">const</span> script = document.createElement('script');
-    script.src = 'https://your-domain.com/embed.js';
+    script.src = 'https://proxy.ws402.org/ws402-solana-embed.js';
     script.setAttribute('data-resource', 'abc123');
     script.setAttribute('data-target', 'video-player');
     document.body.appendChild(script);
@@ -325,7 +404,7 @@
 <span class="tag">export default</span> {
   mounted() {
     <span class="tag">const</span> script = document.createElement('script');
-    script.src = 'https://your-domain.com/embed.js';
+    script.src = 'https://proxy.ws402.org/ws402-solana-embed.js';
     script.setAttribute('data-resource', 'abc123');
     script.setAttribute('data-target', 'video-player');
     document.body.appendChild(script);
@@ -348,7 +427,7 @@
       <div class="steps">
         <div class="step">
           <h3>Paste Your URL</h3>
-          <p>Submit any video, PDF, or API URL to the WS402 Proxy Service. Get a protected resource ID.</p>
+          <p>Submit any video, PDF, or image URL to the WS402 Proxy Service. Get a protected resource ID.</p>
         </div>
         <div class="step">
           <h3>Set Your Price</h3>
@@ -397,7 +476,7 @@
         <div class="feature-card">
           <div class="icon">🌐</div>
           <h3>Universal</h3>
-          <p>Works with videos, audio, PDFs, APIs, images, and more.</p>
+          <p>Works with videos, audio, PDFs, images, and more.</p>
         </div>
       </div>
     </div>
@@ -406,7 +485,7 @@
     <div class="demo-section">
       <h2>⚙️ Widget Options</h2>
       <div class="code-block">
-        <pre><span class="tag">&lt;script</span> <span class="attr">src</span>=<span class="value">"https://your-domain.com/embed.js"</span>
+        <pre><span class="tag">&lt;script</span> <span class="attr">src</span>=<span class="value">"https://proxy.ws402.org/ws402-solana-embed.js"</span>
         <span class="comment">// Required</span>
         <span class="attr">data-resource</span>=<span class="value">"abc123"</span>          <span class="comment">// Your resource ID</span>
         
@@ -457,7 +536,45 @@
   </div>
 
   <script>
-    function showTab(tabName) {
+    // Global variable to track current script
+    let currentEmbedScript = null;
+
+    // Load widget on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      loadCustomResource();
+    });
+
+    function loadCustomResource() {
+      const resourceId = document.getElementById('resourceIdInput').value.trim();
+      
+      if (!resourceId) {
+        alert('Please enter a resource ID');
+        return;
+      }
+
+      // Remove previous script if exists
+      if (currentEmbedScript) {
+        currentEmbedScript.remove();
+      }
+
+      // Clear the container
+      const container = document.getElementById('ws402-demo-player');
+      container.innerHTML = '<div style="text-align: center; padding: 40px; color: #888;">Loading widget...</div>';
+
+      // Create new script element
+      const script = document.createElement('script');
+      script.src = '/ws402-solana-embed.js';
+      script.setAttribute('data-resource', resourceId);
+      script.setAttribute('data-target', 'ws402-demo-player');
+      
+      // Add script to page
+      document.body.appendChild(script);
+      currentEmbedScript = script;
+
+      console.log('Loading widget for resource:', resourceId);
+    }
+
+    function showTab(tabName, event) {
       // Hide all tabs
       document.querySelectorAll('.tab-content').forEach(tab => {
         tab.classList.remove('active');
@@ -468,7 +585,9 @@
 
       // Show selected tab
       document.getElementById(tabName + '-tab').classList.add('active');
-      event.target.classList.add('active');
+      if (event && event.target) {
+        event.target.classList.add('active');
+      }
     }
   </script>
 </body>

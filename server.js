@@ -463,7 +463,7 @@ app.get('/watch/:maskedId', (req, res) => {
 
 // 5. Embed demo page
 app.get('/embed-demo', (req, res) => {
-  res.sendFile(path.join(__dirname, '/public/embed.html'));
+  res.sendFile(path.join(__dirname, '/public/embed-demo.html'));
 });
 
 // 6. Get resources list
