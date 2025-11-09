@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WS402 Proxy - Monetize Any URL</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+      color: #fff;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 50px;
+      padding: 40px 20px;
+    }
+
+    .hero h1 {
+      font-size: 3rem;
+      margin-bottom: 15px;
+      background: linear-gradient(135deg, #fff, #e0e7ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero .tagline {
+      font-size: 1.5rem;
+      opacity: 0.9;
+      margin-bottom: 10px;
+    }
+
+    .hero .subtitle {
+      font-size: 1.1rem;
+      opacity: 0.7;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 40px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      margin-bottom: 30px;
+    }
+
+    .form-group {
+      margin-bottom: 25px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 15px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      font-size: 1rem;
+      font-family: inherit;
+    }
+
+    .form-group input::placeholder,
+    .form-group textarea::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: rgba(255, 255, 255, 0.6);
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .form-group small {
+      display: block;
+      margin-top: 5px;
+      opacity: 0.7;
+      font-size: 0.85rem;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #11998e, #38ef7d);
+      color: white;
+      border: none;
+      padding: 18px 40px;
+      border-radius: 10px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      width: 100%;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn:disabled {
+      background: rgba(255, 255, 255, 0.2);
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .alert {
+      padding: 15px 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+      display: none;
+    }
+
+    .alert.show {
+      display: block;
+    }
+
+    .alert.error {
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #fca5a5;
+    }
+
+    .alert.success {
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #6ee7b7;
+    }
+
+    .result-box {
+      background: rgba(16, 185, 129, 0.1);
+      border: 2px solid rgba(16, 185, 129, 0.3);
+      padding: 30px;
+      border-radius: 15px;
+      margin-top: 30px;
+      display: none;
+    }
+
+    .result-box.show {
+      display: block;
+    }
+
+    .result-box h3 {
+      margin-bottom: 20px;
+      color: #6ee7b7;
+    }
+
+    .result-item {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+
+    .result-item .label {
+      font-size: 0.85rem;
+      opacity: 0.8;
+      margin-bottom: 5px;
+    }
+
+    .result-item .value {
+      font-family: monospace;
+      font-size: 0.95rem;
+      word-break: break-all;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .copy-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      padding: 5px 15px;
+      border-radius: 5px;
+      color: white;
+      cursor: pointer;
+      font-size: 0.85rem;
+      margin-left: 10px;
+    }
+
+    .copy-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-top: 40px;
+    }
+
+    .feature {
+      text-align: center;
+      padding: 20px;
+    }
+
+    .feature .icon {
+      font-size: 3rem;
+      margin-bottom: 10px;
+    }
+
+    .feature h4 {
+      margin-bottom: 8px;
+    }
+
+    .feature p {
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+    }
+
+    .spinner {
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top: 3px solid white;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+      
+      .hero h1 {
+        font-size: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="hero">
+      <h1>🚀 WS402 Proxy</h1>
+      <p class="tagline">Monetize Any URL in 30 Seconds</p>
+      <p class="subtitle">Zero code. Zero installation. Fair pay-as-you-go pricing.</p>
+    </div>
+
+    <div class="card">
+      <div id="alertBox" class="alert"></div>
+
+      <form id="maskForm" onsubmit="createMaskedResource(event)">
+        <div class="form-group">
+          <label>🔗 Your Resource URL</label>
+          <input 
+            type="url" 
+            id="originalUrl" 
+            placeholder="https://vimeo.com/your-video" 
+            required
+          >
+          <small>Any URL: video, PDF, API, image, etc.</small>
+        </div>
+
+        <div class="form-group">
+          <label>📝 Title</label>
+          <input 
+            type="text" 
+            id="title" 
+            placeholder="My Awesome Course" 
+            required
+          >
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>💰 Price per Second (SOL)</label>
+            <input 
+              type="number" 
+              id="pricePerSecond" 
+              placeholder="0.0001" 
+              step="0.00001"
+              min="0.00001"
+              required
+            >
+            <small>~$0.006/min at 0.0001 SOL/sec</small>
+          </div>
+
+          <div class="form-group">
+            <label>⏱️ Estimated Duration (seconds)</label>
+            <input 
+              type="number" 
+              id="estimatedDuration" 
+              placeholder="600" 
+              min="1"
+              required
+            >
+            <small>600 = 10 minutes</small>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>👛 Your Solana Wallet Address</label>
+          <input 
+            type="text" 
+            id="creatorWallet" 
+            placeholder="GHzX...k8pQ" 
+            required
+            pattern="[1-9A-HJ-NP-Za-km-z]{32,44}"
+          >
+          <small>You'll receive payments here (minus 5% service fee)</small>
+        </div>
+
+        <button type="submit" class="btn" id="submitBtn">
+          Generate Protected Link 🔐
+        </button>
+      </form>
+
+      <!-- Result Box -->
+      <div class="result-box" id="resultBox">
+        <h3>✅ Your Resource is Now Protected!</h3>
+        
+        <div class="result-item">
+          <div class="label">🔗 Share this link:</div>
+          <div class="value">
+            <span id="accessUrl"></span>
+            <button class="copy-btn" onclick="copyToClipboard('accessUrl')">Copy</button>
+          </div>
+        </div>
+
+        <div class="result-item">
+          <div class="label">📊 Resource ID:</div>
+          <div class="value">
+            <span id="maskedId"></span>
+          </div>
+        </div>
+
+        <div class="result-item">
+          <div class="label">💵 Estimated Revenue:</div>
+          <div class="value">
+            <span id="estimatedRevenue"></span>
+          </div>
+        </div>
+
+        <div class="result-item">
+          <div class="label">🔌 WebSocket Endpoint:</div>
+          <div class="value">
+            <span id="schemaUrl"></span>
+            <button class="copy-btn" onclick="copyToClipboard('schemaUrl')">Copy</button>
+          </div>
+        </div>
+
+        <button class="btn" onclick="createAnother()" style="margin-top: 20px;">
+          Create Another Protected Link
+        </button>
+      </div>
+    </div>
+
+    <!-- Features -->
+    <div class="features">
+      <div class="feature">
+        <div class="icon">⚡</div>
+        <h4>Instant Setup</h4>
+        <p>Paste URL, set price. Done in 30 seconds.</p>
+      </div>
+      <div class="feature">
+        <div class="icon">💰</div>
+        <h4>Fair Pricing</h4>
+        <p>Users only pay for what they consume.</p>
+      </div>
+      <div class="feature">
+        <div class="icon">🔄</div>
+        <h4>Auto Refunds</h4>
+        <p>Unused balance returned instantly.</p>
+      </div>
+      <div class="feature">
+        <div class="icon">🌐</div>
+        <h4>Universal</h4>
+        <p>Works with any URL or file type.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Create masked resource
+    async function createMaskedResource(event) {
+      event.preventDefault();
+      
+      const submitBtn = document.getElementById('submitBtn');
+      const originalText = submitBtn.textContent;
+      
+      try {
+        // Disable button
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Creating...';
+        showAlert('Creating your protected link...', 'info');
+        
+        // Get form data
+        const priceSOL = parseFloat(document.getElementById('pricePerSecond').value);
+        const estimatedDuration = parseInt(document.getElementById('estimatedDuration').value);
+        
+        // Convert SOL to lamports for backend
+        const priceLamports = Math.floor(priceSOL * 1e9);
+        
+        const data = {
+          originalUrl: document.getElementById('originalUrl').value,
+          title: document.getElementById('title').value,
+          pricePerSecond: priceLamports, // Send in lamports
+          estimatedDuration: estimatedDuration,
+          creatorWallet: document.getElementById('creatorWallet').value
+        };
+        
+        // Validate
+        if (priceSOL < 0.00001) {
+          throw new Error('Price must be at least 0.00001 SOL per second');
+        }
+        
+        console.log('Sending to API:', {
+          ...data,
+          priceSOL: priceSOL,
+          priceLamports: priceLamports
+        });
+        
+        // Send to API
+        const response = await fetch('/api/mask', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        });
+        
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to create masked resource');
+        }
+        
+        const result = await response.json();
+        console.log('Created:', result);
+        
+        // Show result
+        displayResult(result);
+        hideAlert();
+        
+        // Hide form, show result
+        document.getElementById('maskForm').style.display = 'none';
+        document.getElementById('resultBox').classList.add('show');
+        
+      } catch (error) {
+        console.error('Error:', error);
+        showAlert(`Error: ${error.message}`, 'error');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+      }
+    }
+
+    // Display result
+    function displayResult(result) {
+      document.getElementById('accessUrl').textContent = result.accessUrl;
+      document.getElementById('maskedId').textContent = result.maskedId;
+      document.getElementById('schemaUrl').textContent = result.schemaUrl;
+      
+      // Convert lamports to SOL for display
+      const totalCostSOL = result.resource.totalEstimatedCost / 1e9;
+      const totalRevenue = totalCostSOL * 0.95; // 95% after 5% fee
+      
+      document.getElementById('estimatedRevenue').textContent = 
+        `${totalRevenue.toFixed(6)} SOL per complete view`;
+    }
+
+    // Copy to clipboard
+    function copyToClipboard(elementId) {
+      const element = document.getElementById(elementId);
+      const text = element.textContent;
+      
+      navigator.clipboard.writeText(text).then(() => {
+        showAlert('Copied to clipboard!', 'success');
+        setTimeout(hideAlert, 2000);
+      }).catch(err => {
+        console.error('Failed to copy:', err);
+      });
+    }
+
+    // Create another
+    function createAnother() {
+      document.getElementById('maskForm').reset();
+      document.getElementById('maskForm').style.display = 'block';
+      document.getElementById('resultBox').classList.remove('show');
+    }
+
+    // Alert functions
+    function showAlert(message, type = 'info') {
+      const alertBox = document.getElementById('alertBox');
+      alertBox.textContent = message;
+      alertBox.className = `alert ${type} show`;
+    }
+
+    function hideAlert() {
+      const alertBox = document.getElementById('alertBox');
+      alertBox.classList.remove('show');
+    }
+
+    // Pre-fill demo data (for testing)
+    if (window.location.search.includes('demo')) {
+      document.getElementById('originalUrl').value = 'https://vimeo.com/123456789';
+      document.getElementById('title').value = 'Demo Video';
+      document.getElementById('pricePerSecond').value = '0.0001';
+      document.getElementById('estimatedDuration').value = '600';
+      document.getElementById('creatorWallet').value = 'DEMO' + 'x'.repeat(40);
+    }
+  </script>
+</body>
+</html>

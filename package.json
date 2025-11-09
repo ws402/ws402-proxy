@@ -1,0 +1,41 @@
+{
+  "name": "ws402-proxy",
+  "version": "1.0.0",
+  "description": "Monetize any URL with WS402 protocol and Solana payments",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test": "node test.js",
+    "test:watch": "nodemon test.js"
+  },
+  "keywords": [
+    "ws402",
+    "proxy",
+    "monetization",
+    "solana",
+    "pay-per-use",
+    "micropayments",
+    "websocket",
+    "streaming"
+  ],
+  "author": "WS402 Team",
+  "license": "MIT",
+  "dependencies": {
+    "@solana/web3.js": "^1.87.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "nanoid": "^3.3.7",
+    "node-fetch": "^2.7.0",
+    "ws": "^8.14.2",
+    "ws402": "latest"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  }
+}

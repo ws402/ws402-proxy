@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Watch - WS402 Proxy</title>
+  
+  <!-- Solana Web3.js -->
+  <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+      color: #fff;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    .header .subtitle {
+      opacity: 0.9;
+      font-size: 1.1rem;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 30px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+
+    .pricing-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .price-item {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 15px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .price-item .label {
+      font-size: 0.9rem;
+      opacity: 0.8;
+      margin-bottom: 5px;
+    }
+
+    .price-item .value {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
+    .wallet-section {
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn:disabled {
+      background: rgba(255, 255, 255, 0.2);
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn.success {
+      background: linear-gradient(135deg, #11998e, #38ef7d);
+    }
+
+    .btn.danger {
+      background: linear-gradient(135deg, #eb3349, #f45c43);
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-top: 10px;
+    }
+
+    .status-badge.disconnected {
+      background: rgba(239, 68, 68, 0.2);
+      color: #fca5a5;
+    }
+
+    .status-badge.connecting {
+      background: rgba(251, 191, 36, 0.2);
+      color: #fcd34d;
+    }
+
+    .status-badge.connected {
+      background: rgba(16, 185, 129, 0.2);
+      color: #6ee7b7;
+    }
+
+    .viewer-container {
+      background: #000;
+      border-radius: 15px;
+      overflow: hidden;
+      margin: 20px 0;
+      min-height: 500px;
+      display: none;
+    }
+
+    .viewer-container.active {
+      display: block;
+    }
+
+    .viewer-container iframe {
+      width: 100%;
+      height: 600px;
+      border: none;
+    }
+
+    .usage-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin: 20px 0;
+    }
+
+    .stat-item {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 15px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .stat-item .label {
+      font-size: 0.85rem;
+      opacity: 0.8;
+      margin-bottom: 5px;
+    }
+
+    .stat-item .value {
+      font-size: 1.3rem;
+      font-weight: bold;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 5px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #11998e, #38ef7d);
+      transition: width 0.3s ease;
+      border-radius: 5px;
+    }
+
+    .alert {
+      padding: 15px 20px;
+      border-radius: 10px;
+      margin: 15px 0;
+      display: none;
+    }
+
+    .alert.show {
+      display: block;
+    }
+
+    .alert.error {
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #fca5a5;
+    }
+
+    .alert.success {
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #6ee7b7;
+    }
+
+    .alert.info {
+      background: rgba(59, 130, 246, 0.2);
+      border: 1px solid rgba(59, 130, 246, 0.4);
+      color: #93c5fd;
+    }
+
+    .wallet-info {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 15px;
+      border-radius: 10px;
+      margin: 15px 0;
+      font-family: monospace;
+      font-size: 0.9rem;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+    }
+
+    .spinner {
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top: 3px solid white;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .info-box {
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      padding: 15px;
+      border-radius: 10px;
+      margin: 15px 0;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    .info-box strong {
+      color: #93c5fd;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎬 <span id="resourceTitle">Loading...</span></h1>
+      <p class="subtitle">Pay-as-you-go access via Solana</p>
+    </div>
+
+    <!-- Alert Messages -->
+    <div id="alertBox" class="alert"></div>
+
+    <!-- Resource Info Card -->
+    <div class="card">
+      <div class="pricing-info">
+        <div class="price-item">
+          <div class="label">Price per Second</div>
+          <div class="value" id="pricePerSecond">-</div>
+        </div>
+        <div class="price-item">
+          <div class="label">Estimated Duration</div>
+          <div class="value" id="estimatedDuration">-</div>
+        </div>
+        <div class="price-item">
+          <div class="label">Total Cost</div>
+          <div class="value" id="totalCost">-</div>
+        </div>
+      </div>
+
+      <!-- Wallet Section -->
+      <div class="wallet-section">
+        <div id="connectSection">
+          <p style="margin-bottom: 20px; opacity: 0.9;">
+            Connect your Solana wallet to access this content
+          </p>
+          <button class="btn" onclick="connectWallet()">
+            Connect Phantom Wallet
+          </button>
+          <div class="status-badge disconnected">Disconnected</div>
+        </div>
+
+        <div id="paymentSection" style="display: none;">
+          <div class="wallet-info">
+            Connected: <span id="walletAddress"></span>
+          </div>
+          <p style="margin-bottom: 20px;">
+            Authorize payment to access content
+          </p>
+          <button class="btn success" onclick="makePayment()">
+            Pay <span id="payAmount">0</span> SOL & Start
+          </button>
+          <div class="status-badge connecting">Connected</div>
+        </div>
+
+        <div id="activeSection" style="display: none;">
+          <div class="wallet-info">
+            Session: <span id="sessionId"></span>
+          </div>
+          <div class="status-badge connected">Session Active</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Usage Stats (hidden until active) -->
+    <div class="card" id="statsCard" style="display: none;">
+      <h3 style="margin-bottom: 15px;">📊 Usage Statistics</h3>
+      <div class="usage-stats">
+        <div class="stat-item">
+          <div class="label">Time Elapsed</div>
+          <div class="value" id="timeElapsed">0s</div>
+        </div>
+        <div class="stat-item">
+          <div class="label">Amount Used</div>
+          <div class="value" id="amountUsed">0 SOL</div>
+        </div>
+        <div class="stat-item">
+          <div class="label">Remaining Balance</div>
+          <div class="value" id="remainingBalance">0 SOL</div>
+        </div>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressBar" style="width: 0%"></div>
+      </div>
+      <div style="text-align: center; margin-top: 20px;">
+        <button class="btn danger" onclick="disconnect()">
+          Disconnect & Get Refund
+        </button>
+      </div>
+    </div>
+
+    <!-- Resource Viewer -->
+    <div class="viewer-container" id="viewerContainer">
+      <iframe id="resourceFrame" allowfullscreen></iframe>
+    </div>
+
+    <!-- Info Box -->
+    <div class="info-box">
+      <strong>💡 How it works:</strong><br>
+      1. Connect your Phantom wallet<br>
+      2. Authorize payment for estimated duration<br>
+      3. Access content immediately<br>
+      4. We track your actual usage<br>
+      5. When you disconnect, unused balance is refunded automatically<br>
+      <br>
+      <strong>You only pay for what you actually use!</strong> ✅
+    </div>
+  </div>
+
+  <script>
+    // Global state
+    let state = {
+      wallet: null,
+      connection: null,
+      ws: null,
+      schema: null,
+      maskedId: null,
+      sessionActive: false
+    };
+
+    // Get masked ID from URL
+    const pathParts = window.location.pathname.split('/');
+    state.maskedId = pathParts[pathParts.length - 1];
+
+    // Initialize
+    window.addEventListener('DOMContentLoaded', async () => {
+      await loadResourceInfo();
+      checkPhantomInstalled();
+    });
+
+    // Load resource information
+    async function loadResourceInfo() {
+      try {
+        showAlert('Loading resource information...', 'info');
+        
+        const response = await fetch(`/api/resource/${state.maskedId}/schema`);
+        
+        if (!response.ok) {
+          throw new Error(`Resource not found (${response.status})`);
+        }
+        
+        // Parse response - handle both formats
+        const data = await response.json();
+        state.schema = data.ws402Schema || data;
+        
+        console.log('Schema loaded:', state.schema);
+        
+        // Convert lamports to SOL for display
+        const pricePerSecondSOL = state.schema.pricing.pricePerSecond / 1e9;
+        const totalPriceSOL = state.schema.pricing.totalPrice / 1e9;
+        
+        // Update UI
+        document.getElementById('resourceTitle').textContent = 
+          state.schema.resourceInfo?.name || 'Premium Content';
+        document.getElementById('pricePerSecond').textContent = 
+          `${pricePerSecondSOL.toFixed(9)} SOL`;
+        document.getElementById('estimatedDuration').textContent = 
+          formatDuration(state.schema.pricing.estimatedDuration);
+        document.getElementById('totalCost').textContent = 
+          `${totalPriceSOL.toFixed(6)} SOL`;
+        document.getElementById('payAmount').textContent = 
+          totalPriceSOL.toFixed(6);
+        
+        hideAlert();
+        
+      } catch (error) {
+        console.error('Error loading resource:', error);
+        showAlert(`Error: ${error.message}`, 'error');
+      }
+    }
+
+    // Check if Phantom is installed
+    function checkPhantomInstalled() {
+      if (!window.solana || !window.solana.isPhantom) {
+        showAlert('Phantom wallet not detected. Please install Phantom from phantom.app', 'error');
+      }
+    }
+
+    // Connect Phantom wallet
+    async function connectWallet() {
+      try {
+        if (!window.solana) {
+          throw new Error('Phantom wallet not found. Please install it from phantom.app');
+        }
+
+        showAlert('Connecting to Phantom...', 'info');
+        
+        const resp = await window.solana.connect();
+        state.wallet = resp.publicKey.toString();
+        
+        document.getElementById('walletAddress').textContent = 
+          state.wallet.substring(0, 4) + '...' + state.wallet.substring(state.wallet.length - 4);
+        
+        // Show payment section
+        document.getElementById('connectSection').style.display = 'none';
+        document.getElementById('paymentSection').style.display = 'block';
+        
+        showAlert('Wallet connected successfully!', 'success');
+        
+      } catch (error) {
+        console.error('Wallet connection error:', error);
+        showAlert(`Failed to connect wallet: ${error.message}`, 'error');
+      }
+    }
+
+    // Make payment and establish WS402 session
+    async function makePayment() {
+      try {
+        if (!state.wallet) {
+          throw new Error('Wallet not connected');
+        }
+
+        if (!window.solanaWeb3) {
+          throw new Error('Solana Web3.js not loaded');
+        }
+
+        showAlert('Creating transaction...', 'info');
+        
+        // Get payment details from schema
+        const totalPriceLamports = state.schema.pricing.totalPrice;
+        const merchantWallet = state.schema.paymentDetails.recipient;
+        const reference = state.schema.paymentDetails.reference;
+        
+        console.log('Payment details:', {
+          amount: totalPriceLamports,
+          amountSOL: (totalPriceLamports / 1e9).toFixed(6),
+          to: merchantWallet,
+          reference: reference
+        });
+        
+        // Get recent blockhash from server
+        const blockhashResponse = await fetch('/blockhash');
+        if (!blockhashResponse.ok) {
+          throw new Error('Failed to get blockhash from server');
+        }
+        const { blockhash } = await blockhashResponse.json();
+        
+        // Create Solana transaction
+        const { Transaction, SystemProgram, PublicKey } = window.solanaWeb3;
+        
+        const fromPubkey = new PublicKey(state.wallet);
+        const toPubkey = new PublicKey(merchantWallet);
+        const referencePubkey = new PublicKey(reference);
+        
+        const transaction = new Transaction({
+          recentBlockhash: blockhash,
+          feePayer: fromPubkey
+        });
+        
+        // Add transfer instruction
+        const transferInstruction = SystemProgram.transfer({
+          fromPubkey: fromPubkey,
+          toPubkey: toPubkey,
+          lamports: totalPriceLamports
+        });
+        
+        // CRITICAL: Add reference to the instruction keys
+        // This is required for Solana Pay verification
+        transferInstruction.keys.push({
+          pubkey: referencePubkey,
+          isSigner: false,
+          isWritable: false
+        });
+        
+        transaction.add(transferInstruction);
+        
+        showAlert('Please approve transaction in Phantom...', 'info');
+        
+        // Sign and send transaction with Phantom
+        const { signature } = await window.solana.signAndSendTransaction(transaction);
+        
+        console.log('Transaction sent:', signature);
+        console.log('Reference included:', reference);
+        showAlert('Transaction sent! Waiting for confirmation...', 'info');
+        
+        // Wait for confirmation
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        
+        // Connect to WebSocket
+        const wsUrl = state.schema.websocketEndpoint + encodeURIComponent(state.wallet);
+        console.log('Connecting to:', wsUrl);
+        
+        state.ws = new WebSocket(wsUrl);
+        
+        state.ws.onopen = () => {
+          console.log('WebSocket connected');
+          showAlert('Sending payment proof...', 'info');
+          
+          // Send payment proof
+          state.ws.send(JSON.stringify({
+            type: 'payment_proof',
+            proof: {
+              signature: signature,
+              reference: reference,
+              amount: totalPriceLamports
+            }
+          }));
+        };
+        
+        state.ws.onmessage = (event) => {
+          const data = JSON.parse(event.data);
+          console.log('WS Message:', data);
+          handleWebSocketMessage(data);
+        };
+        
+        state.ws.onerror = (error) => {
+          console.error('WebSocket error:', error);
+          showAlert('Connection error occurred', 'error');
+        };
+        
+        state.ws.onclose = () => {
+          console.log('WebSocket closed');
+          if (state.sessionActive) {
+            showAlert('Session ended. Refund processed automatically.', 'success');
+            resetUI();
+          }
+        };
+        
+      } catch (error) {
+        console.error('Payment error:', error);
+        showAlert(`Payment failed: ${error.message}`, 'error');
+      }
+    }
+
+    // Handle WebSocket messages
+    function handleWebSocketMessage(data) {
+      switch (data.type) {
+        case 'session_started':
+          handleSessionStarted(data);
+          break;
+        
+        case 'http_access_granted':
+          handleHTTPAccessGranted(data);
+          break;
+        
+        case 'usage_update':
+          handleUsageUpdate(data);
+          break;
+        
+        case 'balance_exhausted':
+          showAlert('Balance exhausted! Session will end.', 'error');
+          break;
+        
+        case 'payment_rejected':
+          showAlert(`Payment rejected: ${data.reason}`, 'error');
+          resetUI();
+          break;
+        
+        default:
+          console.log('Unknown message type:', data.type);
+      }
+    }
+
+    // Session started
+    function handleSessionStarted(data) {
+      console.log('Session started:', data);
+      state.sessionActive = true;
+      
+      document.getElementById('sessionId').textContent = 
+        data.sessionId.substring(0, 20) + '...';
+      
+      document.getElementById('paymentSection').style.display = 'none';
+      document.getElementById('activeSection').style.display = 'block';
+      document.getElementById('statsCard').style.display = 'block';
+      
+      showAlert('Session active! Loading content...', 'success');
+    }
+
+    // HTTP access granted
+    function handleHTTPAccessGranted(data) {
+      console.log('HTTP access granted:', data);
+      
+      // Load resource in iframe
+      const iframe = document.getElementById('resourceFrame');
+      iframe.src = data.resourceUrl;
+      document.getElementById('viewerContainer').classList.add('active');
+      
+      showAlert('Access granted! Enjoy your content.', 'success');
+      setTimeout(hideAlert, 3000);
+    }
+
+    // Usage update
+    function handleUsageUpdate(data) {
+      // Convert lamports to SOL
+      const consumedSOL = data.consumedAmount / 1e9;
+      const remainingSOL = data.remainingBalance / 1e9;
+      
+      document.getElementById('timeElapsed').textContent = 
+        formatDuration(data.elapsedSeconds);
+      document.getElementById('amountUsed').textContent = 
+        `${consumedSOL.toFixed(6)} SOL`;
+      document.getElementById('remainingBalance').textContent = 
+        `${remainingSOL.toFixed(6)} SOL`;
+      
+      const totalPaid = data.consumedAmount + data.remainingBalance;
+      const percentage = totalPaid > 0 ? (data.consumedAmount / totalPaid) * 100 : 0;
+      document.getElementById('progressBar').style.width = `${percentage}%`;
+    }
+
+    // Disconnect
+    function disconnect() {
+      if (state.ws && state.ws.readyState === WebSocket.OPEN) {
+        state.ws.close();
+      }
+    }
+
+    // Reset UI
+    function resetUI() {
+      state.sessionActive = false;
+      document.getElementById('connectSection').style.display = 'block';
+      document.getElementById('paymentSection').style.display = 'none';
+      document.getElementById('activeSection').style.display = 'none';
+      document.getElementById('statsCard').style.display = 'none';
+      document.getElementById('viewerContainer').classList.remove('active');
+    }
+
+    // Utility functions
+    function showAlert(message, type = 'info') {
+      const alertBox = document.getElementById('alertBox');
+      alertBox.textContent = message;
+      alertBox.className = `alert ${type} show`;
+    }
+
+    function hideAlert() {
+      const alertBox = document.getElementById('alertBox');
+      alertBox.classList.remove('show');
+    }
+
+    function formatDuration(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      if (mins > 0) {
+        return `${mins}m ${secs}s`;
+      }
+      return `${seconds}s`;
+    }
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+      if (state.ws && state.ws.readyState === WebSocket.OPEN) {
+        state.ws.close();
+      }
+    });
+  </script>
+</body>
+</html>
