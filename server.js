@@ -398,7 +398,7 @@ app.get('/api/resource/:maskedId/schema', (req, res) => {
     );
     
     // Configure WebSocket endpoint
-    const wsProtocol = req.protocol === 'https' ? 'wss' : 'ws';
+    const wsProtocol = 'wss';
     schema.websocketEndpoint = `${wsProtocol}://${req.headers.host}/ws402?resourceId=${maskedId}&userId=`;
     
     // Add resource information
