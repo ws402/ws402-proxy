@@ -673,7 +673,7 @@ setInterval(() => {
 
 // ===== START SERVER =====
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 4021;
 
 server.listen(PORT, () => {
   const connectionInfo = solanaProvider.getConnectionInfo();
